@@ -5,11 +5,12 @@ import { useParams } from 'next/navigation'
 import { createClient } from '../../../lib/supabase/client'
 import ArticleCard from '../../../components/articles/ArticleCard'
 import Link from 'next/link'
-import { ArrowLeft, Tag } from 'lucide-react'
+import { ArrowLeft, User } from 'lucide-react'
 
-export default function TagPage() {
+export default function AuthorPage() {
   const params = useParams()
-  const tag = decodeURIComponent(params.tag)
+  const authorSlug = params.authorSlug
+  const [author, setAuthor] = useState(null)
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -24,8 +25,8 @@ export default function TagPage() {
       }
     }, 10000)
 
-    async function fetchArticles() {
-      if (!tag) {
+    async function fetchData() {
+      if (!authorSlug) {
         if (mounted) {
           clearTimeout(timeoutId)
           setLoading(false)
@@ -36,10 +37,53 @@ export default function TagPage() {
       try {
         const supabase = createClient()
         
-        // Récupérer tous les articles
+        // Récupérer l'auteur par slug ou ID
+        let authorData = null
+        
+        // Essayer de trouver par author_slug
+        const { data: profileBySlug } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('author_slug', authorSlug)
+          .single()
+        
+        if (profileBySlug) {
+          authorData = profileBySlug
+        } else {
+          // Si pas trouvé par slug, essayer par ID
+          const { data: profileById } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authorSlug)
+            .single()
+          
+          if (profileById) {
+            authorData = profileById
+          }
+        }
+
+        if (!mounted) {
+          return
+        }
+
+        if (!authorData) {
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Auteur non trouvé.')
+            setLoading(false)
+          }
+          return
+        }
+
+        if (mounted) {
+          setAuthor(authorData)
+        }
+
+        // Récupérer les articles de l'auteur
         const { data: posts, error: postsError } = await supabase
           .from('posts')
           .select('*')
+          .eq('author_id', authorData.id)
           .order('created_at', { ascending: false })
 
         if (!mounted) {
@@ -51,20 +95,9 @@ export default function TagPage() {
           console.error('Erreur posts:', postsError)
         }
 
-        // Filtrer les articles qui contiennent le tag
-        const filteredPosts = posts?.filter(post => {
-          const postTags = post.tags || []
-          return postTags.includes(tag)
-        }) || []
-
         // Récupérer les catégories
         const { data: categories } = await supabase
           .from('categories')
-          .select('*')
-
-        // Récupérer les profils
-        const { data: profiles } = await supabase
-          .from('profiles')
           .select('*')
 
         if (!mounted) {
@@ -72,10 +105,10 @@ export default function TagPage() {
         }
 
         // Enrichir les articles
-        const enrichedArticles = filteredPosts.map(post => ({
+        const enrichedArticles = (posts || []).map(post => ({
           ...post,
           category: categories?.find(cat => cat.slug === post.category_slug),
-          author: profiles?.find(prof => prof.id === post.author_id)
+          author: authorData
         }))
 
         if (mounted) {
@@ -93,15 +126,39 @@ export default function TagPage() {
       }
     }
 
-    fetchArticles()
+    fetchData()
 
     return () => {
       mounted = false
       clearTimeout(timeoutId)
     }
-  }, [tag])
+  }, [authorSlug])
 
   if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+      </div>
+    )
+  }
+
+  // Afficher l'erreur seulement si on a une erreur ET pas d'auteur
+  if (error && !author) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md w-full">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Erreur</h2>
+          <p className="text-gray-700 mb-6">{error}</p>
+          <Link href="/" className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium">
+            Retour à l'accueil
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Si pas d'auteur et pas d'erreur, c'est qu'on est encore en chargement
+  if (!author && !error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
@@ -122,31 +179,25 @@ export default function TagPage() {
             Retour
           </Link>
           
-          <div className="flex items-center gap-3 mb-2">
-            <Tag className="w-5 h-5 text-primary" />
-            <span className="inline-flex items-center gap-1 px-3 py-1.5 border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 text-sm font-semibold">
-              #{tag}
-            </span>
+          <div className="flex flex-col items-center text-center mb-2">
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+              <User className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-xs text-gray-500 uppercase mb-1">AUTEUR</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              {author.user_name || author.prenom || 'Anonyme'}
+            </h1>
+            <p className="text-sm text-gray-600">
+              {articles.length} {articles.length === 1 ? 'article publié' : 'articles publiés'}
+            </p>
           </div>
-          
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Articles avec le tag #{tag}
-          </h1>
-          <p className="text-sm text-gray-600">
-            {articles.length} {articles.length === 1 ? 'article trouvé' : 'articles trouvés'}
-          </p>
         </div>
       </div>
 
       {/* Articles */}
       <section className="py-12">
         <div className="container mx-auto px-4 max-w-7xl">
-          {error ? (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              <p>Erreur lors du chargement des articles.</p>
-              <p className="text-sm mt-2">{error}</p>
-            </div>
-          ) : articles.length > 0 ? (
+          {articles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {articles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
@@ -155,7 +206,7 @@ export default function TagPage() {
           ) : (
             <div className="text-center py-12 bg-white rounded-lg shadow">
               <p className="text-gray-500 text-lg">
-                Aucun article trouvé pour le tag "{tag}".
+                Aucun article publié par cet auteur.
               </p>
             </div>
           )}

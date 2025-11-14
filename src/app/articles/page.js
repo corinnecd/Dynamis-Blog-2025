@@ -14,73 +14,45 @@ export default function Home() {
   useEffect(() => {
     let mounted = true
 
-    // Timeout de sécurité : forcer loading à false après 5 secondes maximum
+    // Timeout de sécurité : forcer loading à false après 10 secondes maximum
     const timeoutId = setTimeout(() => {
       if (mounted) {
-        console.log('⏱️ HomePage: Timeout - forcer loading à false')
         setLoading(false)
       }
-    }, 5000)
+    }, 10000)
 
     async function fetchArticles() {
       try {
-        console.log('🔄 HomePage: Début du chargement des articles')
         const supabase = createClient()
         
-        // Ajouter un timeout pour la requête elle-même
-        const postsPromise = supabase
+        const { data: posts, error: postsError } = await supabase
           .from('posts')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(12)
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout: requête posts trop longue')), 4000)
-        )
-        
-        let postsResult
-        try {
-          postsResult = await Promise.race([
-            postsPromise,
-            timeoutPromise
-          ])
-        } catch (err) {
-          console.error('❌ HomePage: Timeout ou erreur posts:', err)
-          postsResult = { data: null, error: err }
-        }
-        
-        const { data: posts, error: postsError } = postsResult || { data: null, error: null }
-
-        console.log('📦 HomePage: Posts récupérés', { count: posts?.length, error: postsError })
 
         if (!mounted) {
-          console.log('⚠️ HomePage: Composant démonté, arrêt')
           return
         }
 
         if (postsError) {
-          console.error('❌ HomePage: Erreur posts:', postsError)
+          console.error('Erreur posts:', postsError)
           if (mounted) {
             clearTimeout(timeoutId)
-            setError(postsError.message || 'Erreur lors du chargement des articles')
+            setError(postsError.message)
             setLoading(false)
           }
           return
         }
 
-        // Requêtes parallèles pour catégories et profils avec timeout
-        const [categoriesResult, profilesResult] = await Promise.allSettled([
-          supabase.from('categories').select('*'),
-          supabase.from('profiles').select('*')
-        ])
+        const { data: categories } = await supabase
+          .from('categories')
+          .select('*')
 
-        const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : []
-        const profiles = profilesResult.status === 'fulfilled' ? profilesResult.value.data : []
-
-        console.log('📦 HomePage: Catégories et profils récupérés')
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('*')
 
         if (!mounted) {
-          console.log('⚠️ HomePage: Composant démonté après catégories/profils')
           return
         }
 
@@ -91,16 +63,15 @@ export default function Home() {
         })) || []
 
         if (mounted) {
-          console.log('✅ HomePage: Articles enrichis, mise à jour du state')
           clearTimeout(timeoutId)
           setArticles(enrichedArticles)
           setLoading(false)
         }
       } catch (err) {
-        console.error('❌ HomePage: Erreur complète:', err)
+        console.error('❌ Erreur complète:', err)
         if (mounted) {
           clearTimeout(timeoutId)
-          setError(err.message || 'Une erreur est survenue')
+          setError(err.message)
           setLoading(false)
         }
       }
@@ -127,9 +98,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section - FOND BLANC */}
+      {/* Hero Section */}
       <section className="bg-white py-20">
-        <div className="container mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
             Explorez, Apprenez, <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 bg-clip-text text-transparent">Partagez.</span>
           </h1>
@@ -141,7 +112,7 @@ export default function Home() {
 
       {/* Section Derniers Articles */}
       <section className="py-16">
-        <div className="container mx-auto px-4 max-w-7xl xl:max-w-[1400px]">
+        <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">
             Derniers articles
           </h2>
@@ -152,7 +123,7 @@ export default function Home() {
               <p className="text-sm mt-2">{error}</p>
             </div>
           ) : articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
@@ -170,12 +141,12 @@ export default function Home() {
       {/* Section Plus d'articles */}
       {!showAll && moreArticles.length > 0 && (
         <section className="pb-16">
-          <div className="container mx-auto px-4 max-w-7xl xl:max-w-[1400px]">
+          <div className="max-w-5xl mx-auto px-4">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
               Plus d'articles
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {moreArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
@@ -187,7 +158,7 @@ export default function Home() {
       {/* Boutons Voir plus / Voir moins */}
       {articles.length > 3 && (
         <section className="pb-16">
-          <div className="container mx-auto px-4 flex justify-center gap-4">
+          <div className="max-w-5xl mx-auto px-4 flex justify-center gap-4">
             {!showAll ? (
               <button
                 onClick={() => setShowAll(true)}

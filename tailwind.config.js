@@ -5,6 +5,21 @@ module.exports = {
     './src/components/**/*.{js,jsx}',
     './src/app/**/*.{js,jsx}',
   ],
+  safelist: [
+    // Gradients pour les catégories
+    'from-yellow-400',
+    'to-amber-500',
+    'from-red-500',
+    'to-orange-500',
+    'from-purple-500',
+    'to-pink-500',
+    'from-blue-500',
+    'to-indigo-600',
+    'from-green-400',
+    'to-teal-500',
+    'from-cyan-400',
+    'to-sky-500',
+  ],
   theme: {
     extend: {
       colors: {
