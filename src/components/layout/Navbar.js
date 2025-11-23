@@ -85,18 +85,18 @@ export default function Navbar() {
           DYNAMIS BLOG
         </Link>
         
-        {/* Catégories au centre - masqué sur mobile */}
-        <div className="hidden md:flex flex-1 justify-center">
+        {/* Catégories au centre - visible sur mobile et desktop */}
+        <div className="flex flex-1 justify-center">
           <Link 
             href="/categories" 
-            className="px-4 py-2 rounded-lg transition-colors font-medium hover:text-primary"
+            className="px-2 md:px-4 py-2 rounded-lg transition-colors font-medium hover:text-primary text-sm md:text-base"
           >
             Catégories
           </Link>
         </div>
 
         {/* Boutons à droite */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-4">
           {loading ? (
             <div className="w-5 h-5 border-2 border-gray-300 border-t-primary rounded-full animate-spin"></div>
           ) : user ? (
