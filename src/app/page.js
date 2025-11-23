@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../lib/supabase/client'
-import ArticleCard from '../components/articles/ArticleCard'
+import { createClient } from '@/lib/supabase/client'
+import ArticleCard from '@/components/articles/ArticleCard'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function Home() {
@@ -14,47 +14,37 @@ export default function Home() {
   useEffect(() => {
     let mounted = true
 
-    // Timeout de sécurité : forcer loading à false après 5 secondes maximum
+    // Timeout de sécurité : forcer loading à false après 15 secondes maximum
     const timeoutId = setTimeout(() => {
       if (mounted) {
-        console.log('⏱️ HomePage: Timeout - forcer loading à false')
+        console.log('⏱️ HomePage: Timeout de sécurité - forcer loading à false')
         setLoading(false)
       }
-    }, 5000)
+    }, 15000)
 
     async function fetchArticles() {
       try {
-        console.log('🔄 HomePage: Début du chargement des articles')
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ HomePage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
-        // Ajouter un timeout pour la requête elle-même
-        const postsPromise = supabase
+        // Requête posts sans timeout agressif
+        const { data: posts, error: postsError } = await supabase
           .from('posts')
           .select('*')
           .order('created_at', { ascending: false })
           .limit(12)
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout: requête posts trop longue')), 4000)
-        )
-        
-        let postsResult
-        try {
-          postsResult = await Promise.race([
-            postsPromise,
-            timeoutPromise
-          ])
-        } catch (err) {
-          console.error('❌ HomePage: Timeout ou erreur posts:', err)
-          postsResult = { data: null, error: err }
-        }
-        
-        const { data: posts, error: postsError } = postsResult || { data: null, error: null }
-
-        console.log('📦 HomePage: Posts récupérés', { count: posts?.length, error: postsError })
 
         if (!mounted) {
-          console.log('⚠️ HomePage: Composant démonté, arrêt')
           return
         }
 
@@ -62,46 +52,47 @@ export default function Home() {
           console.error('❌ HomePage: Erreur posts:', postsError)
           if (mounted) {
             clearTimeout(timeoutId)
-            setError(postsError.message || 'Erreur lors du chargement des articles')
+            setError('Erreur lors du chargement des articles.')
             setLoading(false)
           }
           return
         }
 
-        // Requêtes parallèles pour catégories et profils avec timeout
+        // Requêtes parallèles pour catégories et profils avec gestion d'erreur
         const [categoriesResult, profilesResult] = await Promise.allSettled([
           supabase.from('categories').select('*'),
           supabase.from('profiles').select('*')
         ])
 
-        const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : []
-        const profiles = profilesResult.status === 'fulfilled' ? profilesResult.value.data : []
-
-        console.log('📦 HomePage: Catégories et profils récupérés')
+        const categories = categoriesResult.status === 'fulfilled' && categoriesResult.value.data 
+          ? categoriesResult.value.data 
+          : []
+        const profiles = profilesResult.status === 'fulfilled' && profilesResult.value.data
+          ? profilesResult.value.data
+          : []
 
         if (!mounted) {
-          console.log('⚠️ HomePage: Composant démonté après catégories/profils')
           return
         }
 
-        const enrichedArticles = posts?.map(post => ({
+        const enrichedArticles = (posts || []).map(post => ({
           ...post,
           category: categories?.find(cat => cat.slug === post.category_slug),
           author: profiles?.find(prof => prof.id === post.author_id)
-        })) || []
+        }))
 
         if (mounted) {
-          console.log('✅ HomePage: Articles enrichis, mise à jour du state')
           clearTimeout(timeoutId)
-          setArticles(enrichedArticles)
+        setArticles(enrichedArticles)
           setLoading(false)
+          setError(null)
         }
       } catch (err) {
         console.error('❌ HomePage: Erreur complète:', err)
         if (mounted) {
           clearTimeout(timeoutId)
-          setError(err.message || 'Une erreur est survenue')
-          setLoading(false)
+          setError('Une erreur est survenue lors du chargement.')
+        setLoading(false)
         }
       }
     }

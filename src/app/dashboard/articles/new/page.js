@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '../../../../lib/supabase/client'
-import { generateSlug as generateSlugUtil } from '../../../../lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { generateSlug as generateSlugUtil } from '@/lib/utils'
 import { Upload, X, Save, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
@@ -40,7 +40,18 @@ export default function CreateArticle() {
     
     async function checkAuth() {
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ CreateArticle: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Vérifier l'authentification
         const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
@@ -259,7 +270,15 @@ export default function CreateArticle() {
         return
       }
 
-      const supabase = createClient()
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ Erreur configuration Supabase:', configError)
+        setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+        setUploading(false)
+        return
+      }
 
       // Convertir l'image en base64 si présente (stockage local dans le contenu)
       let contentWithImage = content.trim()
@@ -510,7 +529,7 @@ export default function CreateArticle() {
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors">
+            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-4" />
                   <p className="mb-2 text-sm text-gray-500">

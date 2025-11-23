@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../../lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { 
   ShieldCheck, 
@@ -41,7 +41,18 @@ export default function CategoriesPage() {
 
     async function fetchCategories() {
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ CategoriesPage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Récupérer toutes les catégories
         const { data: categoriesData, error: categoriesError } = await supabase

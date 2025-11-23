@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient } from '../lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 const AuthContext = createContext({})
 
@@ -34,14 +34,14 @@ export function AuthProvider({ children }) {
         const { data: { session } } = await supabase.auth.getSession()
         if (mounted) {
           clearTimeout(timeoutId)
-          setUser(session?.user ?? null)
+        setUser(session?.user ?? null)
           setLoading(false)
         }
       } catch (error) {
         console.error('Erreur vérification session:', error)
         if (mounted) {
           clearTimeout(timeoutId)
-          setLoading(false)
+        setLoading(false)
         }
       }
     }
@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
         clearTimeout(timeoutId)
-        setUser(session?.user ?? null)
+      setUser(session?.user ?? null)
         setLoading(false)
       }
     })
@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
       mounted = false
       clearTimeout(timeoutId)
       if (subscription) {
-        subscription.unsubscribe()
+      subscription.unsubscribe()
       }
     }
   }, [])
@@ -111,11 +111,13 @@ export function AuthProvider({ children }) {
   // Déconnexion
   const signOut = async () => {
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       setUser(null)
       return { error: null }
     } catch (error) {
+      console.error('Erreur déconnexion:', error)
       return { error: error.message }
     }
   }

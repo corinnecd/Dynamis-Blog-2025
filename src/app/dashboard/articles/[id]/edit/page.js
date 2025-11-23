@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../../../../../lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter, useParams } from 'next/navigation'
-import { generateSlug as generateSlugUtil } from '../../../../../lib/utils'
+import { generateSlug as generateSlugUtil } from '@/lib/utils'
 import { Upload, X, Pencil } from 'lucide-react'
 import Link from 'next/link'
 
@@ -53,7 +53,18 @@ export default function EditArticlePage() {
           return
         }
 
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ EditArticlePage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Vérifier l'authentification
         const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
@@ -355,7 +366,15 @@ export default function EditArticlePage() {
         return
       }
 
-      const supabase = createClient()
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ Erreur configuration Supabase:', configError)
+        setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+        setUploading(false)
+        return
+      }
 
       // Convertir l'image en base64 si une nouvelle image est fournie (stockage local dans le contenu)
       let contentWithImage = content.trim()

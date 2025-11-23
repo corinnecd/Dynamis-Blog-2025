@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '../../../lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
@@ -35,7 +35,15 @@ export default function SignUpPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ SignUpPage: Erreur configuration Supabase:', configError)
+        setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+        setLoading(false)
+        return
+      }
       
       // Créer l'utilisateur (sans créer le profil immédiatement pour éviter les conflits avec les triggers)
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -140,28 +148,18 @@ export default function SignUpPage() {
         }
       }
 
-      // Vérifier si l'utilisateur a une session active
-      const { data: { session } } = await supabase.auth.getSession()
+      // Toujours rediriger vers la page de connexion après une inscription réussie
+      console.log('✅ Inscription réussie, redirection vers la page de connexion')
+      setLoading(false)
       
-      if (session && session.user) {
-        // Si la session est active, rediriger vers le dashboard
-        console.log('✅ Session active, redirection vers le dashboard')
-        window.location.href = '/dashboard'
-      } else {
-        // Si pas de session (email non confirmé), afficher un message de succès
-        console.log('⚠️ Pas de session active, redirection vers la connexion')
-        setError('')
-        setLoading(false)
-        
-        // Afficher un message de succès
-        const successMessage = 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter avec vos identifiants.'
-        setError(successMessage)
-        
-        // Changer le style du message pour un message de succès
-        setTimeout(() => {
-          window.location.href = '/auth/signin'
-        }, 3000)
-      }
+      // Afficher un message de succès temporaire
+      const successMessage = 'Votre compte a été créé avec succès ! Redirection vers la page de connexion...'
+      setError(successMessage)
+      
+      // Rediriger vers la page de connexion après un court délai
+      setTimeout(() => {
+        window.location.href = '/auth/signin'
+      }, 2000)
     } catch (err) {
       setError('Une erreur est survenue lors de l\'inscription.')
       setLoading(false)

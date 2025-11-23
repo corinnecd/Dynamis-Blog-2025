@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { createClient } from '../../../lib/supabase/client'
-import ArticleCard from '../../../components/articles/ArticleCard'
+import { createClient } from '@/lib/supabase/client'
+import ArticleCard from '@/components/articles/ArticleCard'
 import Link from 'next/link'
 import { ArrowLeft, ShieldCheck, Code, BrainCircuit, Zap, Globe, Brush } from 'lucide-react'
 
@@ -36,7 +36,18 @@ export default function CategoryPage() {
       }
 
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ CategoryPage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Récupérer la catégorie par slug
         const { data: categoryData, error: categoryError } = await supabase

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { createClient } from '../../../lib/supabase/client'
-import ArticleCard from '../../../components/articles/ArticleCard'
+import { createClient } from '@/lib/supabase/client'
+import ArticleCard from '@/components/articles/ArticleCard'
 import Link from 'next/link'
 import { ArrowLeft, User } from 'lucide-react'
 
@@ -35,7 +35,18 @@ export default function AuthorPage() {
       }
 
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ AuthorPage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Récupérer l'auteur par slug ou ID
         let authorData = null

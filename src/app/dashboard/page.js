@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../../lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Edit, Trash2, FileText } from 'lucide-react'
@@ -26,7 +26,18 @@ export default function DashboardPage() {
     
     async function checkAuth() {
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ Dashboard: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Vérifier l'authentification
         const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
@@ -147,7 +158,14 @@ export default function DashboardPage() {
     }
 
     try {
-      const supabase = createClient()
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ Erreur configuration Supabase:', configError)
+        alert('Erreur de configuration. Vérifiez les variables d\'environnement.')
+        return
+      }
       
       // Vérifier les permissions avant de supprimer
       const isSuperAdmin = profile?.is_super_admin || user?.email === 'corinnediarra.cd@gmail.com'

@@ -1,29 +1,38 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../lib/supabase/client'
-import ArticleCard from '../components/articles/ArticleCard'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import ArticleCard from '@/components/articles/ArticleCard'
 
-export default function Home() {
+export default function ArticlesPage() {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     let mounted = true
 
-    // Timeout de sécurité : forcer loading à false après 10 secondes maximum
+    // Timeout de sécurité : forcer loading à false après 15 secondes maximum
     const timeoutId = setTimeout(() => {
       if (mounted) {
         setLoading(false)
       }
-    }, 10000)
+    }, 15000)
 
     async function fetchArticles() {
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ ArticlesPage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         const { data: posts, error: postsError } = await supabase
           .from('posts')
@@ -38,40 +47,46 @@ export default function Home() {
           console.error('Erreur posts:', postsError)
           if (mounted) {
             clearTimeout(timeoutId)
-            setError(postsError.message)
+            setError('Erreur lors du chargement des articles.')
             setLoading(false)
           }
           return
         }
 
-        const { data: categories } = await supabase
-          .from('categories')
-          .select('*')
+        // Requêtes parallèles pour catégories et profils avec gestion d'erreur
+        const [categoriesResult, profilesResult] = await Promise.allSettled([
+          supabase.from('categories').select('*'),
+          supabase.from('profiles').select('*')
+        ])
 
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('*')
+        const categories = categoriesResult.status === 'fulfilled' && categoriesResult.value.data 
+          ? categoriesResult.value.data 
+          : []
+        const profiles = profilesResult.status === 'fulfilled' && profilesResult.value.data
+          ? profilesResult.value.data
+          : []
 
         if (!mounted) {
           return
         }
 
-        const enrichedArticles = posts?.map(post => ({
+        const enrichedArticles = (posts || []).map(post => ({
           ...post,
           category: categories?.find(cat => cat.slug === post.category_slug),
           author: profiles?.find(prof => prof.id === post.author_id)
-        })) || []
+        }))
 
         if (mounted) {
           clearTimeout(timeoutId)
           setArticles(enrichedArticles)
           setLoading(false)
+          setError(null)
         }
       } catch (err) {
         console.error('❌ Erreur complète:', err)
         if (mounted) {
           clearTimeout(timeoutId)
-          setError(err.message)
+          setError('Une erreur est survenue lors du chargement.')
           setLoading(false)
         }
       }
@@ -85,9 +100,6 @@ export default function Home() {
     }
   }, [])
 
-  const displayedArticles = showAll ? articles : articles.slice(0, 3)
-  const moreArticles = showAll ? [] : articles.slice(3, 9)
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -98,24 +110,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-white py-20">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Explorez, Apprenez, <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 bg-clip-text text-transparent">Partagez.</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-            DYNAMIS Blog, votre plateforme 100 % Tech !
-          </p>
-        </div>
-      </section>
-
-      {/* Section Derniers Articles */}
       <section className="py-16">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Derniers articles
-          </h2>
+        <div className="container mx-auto px-4 max-w-7xl xl:max-w-[1400px]">
+          <h1 className="text-4xl font-bold text-gray-900 mb-8">
+            Tous les articles
+          </h1>
           
           {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -123,8 +122,8 @@ export default function Home() {
               <p className="text-sm mt-2">{error}</p>
             </div>
           ) : articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedArticles.map((article) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+              {articles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
             </div>
@@ -137,51 +136,6 @@ export default function Home() {
           )}
         </div>
       </section>
-
-      {/* Section Plus d'articles */}
-      {!showAll && moreArticles.length > 0 && (
-        <section className="pb-16">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Plus d'articles
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {moreArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Boutons Voir plus / Voir moins */}
-      {articles.length > 3 && (
-        <section className="pb-16">
-          <div className="max-w-5xl mx-auto px-4 flex justify-center gap-4">
-            {!showAll ? (
-              <button
-                onClick={() => setShowAll(true)}
-                className="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-all duration-300 font-medium"
-              >
-                Voir plus d'articles
-                <ChevronDown className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setShowAll(false)
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
-                className="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-all duration-300 font-medium"
-              >
-                Voir moins d'articles
-                <ChevronUp className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-        </section>
-      )}
     </div>
   )
 }

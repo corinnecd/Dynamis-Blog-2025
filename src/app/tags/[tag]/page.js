@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { createClient } from '../../../lib/supabase/client'
-import ArticleCard from '../../../components/articles/ArticleCard'
+import { createClient } from '@/lib/supabase/client'
+import ArticleCard from '@/components/articles/ArticleCard'
 import Link from 'next/link'
 import { ArrowLeft, Tag } from 'lucide-react'
 
@@ -34,7 +34,18 @@ export default function TagPage() {
       }
 
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ TagPage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
         
         // Récupérer tous les articles
         const { data: posts, error: postsError } = await supabase

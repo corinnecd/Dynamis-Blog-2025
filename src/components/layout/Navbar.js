@@ -60,9 +60,15 @@ export default function Navbar() {
   }, [dropdownOpen])
 
   const handleSignOut = async () => {
-    await signOut()
     setDropdownOpen(false)
-    window.location.href = '/'
+    const result = await signOut()
+    if (!result.error) {
+      // Forcer le rechargement de la page pour s'assurer que la session est bien supprimée
+      window.location.href = '/'
+    } else {
+      console.error('Erreur lors de la déconnexion:', result.error)
+      alert('Erreur lors de la déconnexion. Veuillez réessayer.')
+    }
   }
 
   return (

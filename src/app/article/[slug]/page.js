@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '../../../lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Calendar, User, Edit, Trash2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { getImageUrl } from '../../../lib/utils'
+import { getImageUrl } from '@/lib/utils'
 
 export default function ArticleDetailPage() {
   const params = useParams()
@@ -39,7 +39,18 @@ export default function ArticleDetailPage() {
       }
 
       try {
-        const supabase = createClient()
+        let supabase
+        try {
+          supabase = createClient()
+        } catch (configError) {
+          console.error('❌ ArticleDetailPage: Erreur configuration Supabase:', configError)
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setError('Erreur de configuration. Vérifiez les variables d\'environnement.')
+            setLoading(false)
+          }
+          return
+        }
 
         // Vérifier l'utilisateur connecté
         const { data: { user: currentUser } } = await supabase.auth.getUser()
@@ -147,7 +158,14 @@ export default function ArticleDetailPage() {
     }
 
     try {
-      const supabase = createClient()
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ Erreur configuration Supabase:', configError)
+        alert('Erreur de configuration. Vérifiez les variables d\'environnement.')
+        return
+      }
       const isSuperAdmin = profile?.is_super_admin || user?.email === 'corinnediarra.cd@gmail.com'
       const isAuthor = article.author_id === user?.id
 

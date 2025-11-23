@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "../../../lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -20,10 +20,19 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
+      let supabase;
+      try {
+        supabase = createClient();
+      } catch (configError) {
+        console.error("❌ SignInPage: Erreur configuration Supabase:", configError);
+        setError("Erreur de configuration. Vérifiez les variables d'environnement.");
+        setLoading(false);
+        return;
+      }
+      
       const { data, error: signInError } =
         await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim().toLowerCase(),
           password,
         });
 
@@ -32,12 +41,18 @@ export default function SignInPage() {
 
         // Messages d'erreur plus clairs
         let errorMessage = signInError.message;
-        if (signInError.message?.includes("Invalid login credentials")) {
+        if (signInError.message?.includes("Invalid login credentials") || 
+            signInError.message?.includes("invalid_credentials") ||
+            signInError.status === 400) {
           errorMessage =
             "Email ou mot de passe incorrect. Vérifiez vos identifiants.";
-        } else if (signInError.message?.includes("Email not confirmed")) {
+        } else if (signInError.message?.includes("Email not confirmed") ||
+                   signInError.message?.includes("email_not_confirmed")) {
           errorMessage =
-            "Votre email n'a pas été confirmé. Vérifiez votre boîte mail.";
+            "Votre email n'a pas été confirmé. Vérifiez votre boîte mail et cliquez sur le lien de confirmation.";
+        } else if (signInError.message?.includes("User not found")) {
+          errorMessage =
+            "Aucun compte n'est associé à cet email. Vérifiez votre adresse email ou créez un compte.";
         }
 
         setError(errorMessage);
@@ -78,7 +93,7 @@ export default function SignInPage() {
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="w-5 h-5" />
                 <span className="font-semibold">
-                  Erreur lors de la création du compte
+                  Erreur lors de la connexion
                 </span>
               </div>
               <p className="text-sm">{error}</p>
@@ -102,7 +117,7 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="votre@email.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
               />
             </div>
 
