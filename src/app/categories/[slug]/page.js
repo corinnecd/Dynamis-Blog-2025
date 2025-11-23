@@ -226,10 +226,10 @@ export default function CategoryPage() {
       </div>
 
       {/* Articles Grid */}
-      <section className="py-12">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4 max-w-7xl xl:max-w-[1400px]">
           {articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {articles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}

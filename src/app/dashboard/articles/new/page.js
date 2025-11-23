@@ -372,10 +372,10 @@ export default function CreateArticle() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-6 md:py-12">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-primary mb-4"
@@ -383,13 +383,13 @@ export default function CreateArticle() {
             <ArrowLeft className="w-4 h-4" />
             Retour au dashboard
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
             Créer un nouvel article
           </h1>
         </div>
 
         {/* Formulaire */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-4 md:p-8 space-y-4 md:space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
@@ -419,9 +419,9 @@ export default function CreateArticle() {
             </label>
             
             {/* Zone de saisie, bouton Ajouter et zone d'affichage des tags sur une seule ligne */}
-            <div className="flex gap-2 items-start">
+            <div className="flex flex-col md:flex-row gap-2 items-start">
               {/* Champ de saisie avec autocomplétion */}
-              <div className="relative w-48">
+              <div className="relative w-full md:w-48">
                 <input
                   type="text"
                   value={tagInput}
@@ -458,19 +458,19 @@ export default function CreateArticle() {
               </div>
               
               {/* Bouton Ajouter */}
-              <div className="flex flex-col w-24">
+              <div className="flex flex-col w-full md:w-24">
                 <button
                   type="button"
                   onClick={addTag}
                   disabled={tags.length >= 3 || !tagInput.trim()}
-                  className="px-2 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap h-[42px] text-sm"
+                  className="px-2 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap h-[42px] text-sm w-full md:w-auto"
                 >
                   Ajouter
                 </button>
               </div>
               
               {/* Zone d'affichage des tags sélectionnés */}
-              <div className="flex-[3] flex flex-col">
+              <div className="w-full md:flex-[3] flex flex-col">
                 <div className="h-[42px] overflow-hidden border border-gray-300 rounded-lg p-2 bg-gray-50">
                   {tags.length === 0 ? (
                     <p className="text-sm text-gray-400 text-center py-1">
@@ -588,11 +588,11 @@ export default function CreateArticle() {
           </div>
 
           {/* Boutons */}
-          <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 md:gap-4 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={() => window.location.href = '/dashboard'}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-4 md:px-6 py-2 md:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
               disabled={uploading}
             >
               Annuler
@@ -600,7 +600,7 @@ export default function CreateArticle() {
             <button
               type="submit"
               disabled={uploading}
-              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 md:px-6 py-2 md:py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
             >
               {uploading ? 'Publication...' : 'Publier l\'article'}
             </button>

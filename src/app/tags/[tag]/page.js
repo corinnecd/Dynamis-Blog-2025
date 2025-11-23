@@ -150,7 +150,7 @@ export default function TagPage() {
       </div>
 
       {/* Articles */}
-      <section className="py-12">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4 max-w-7xl">
           {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -158,7 +158,7 @@ export default function TagPage() {
               <p className="text-sm mt-2">{error}</p>
             </div>
           ) : articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {articles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}

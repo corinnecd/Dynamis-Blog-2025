@@ -211,17 +211,17 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-white border-b border-gray-200 py-8">
+      <section className="bg-white border-b border-gray-200 py-6 md:py-8">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 Mon Dashboard
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm md:text-base text-gray-600">
                 Bienvenue, {profile?.user_name || 'Utilisateur'}
                 {isSuperAdmin && (
-                  <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm font-medium">
+                  <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs md:text-sm font-medium">
                     Super Admin
                   </span>
                 )}
@@ -229,9 +229,9 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/dashboard/articles/new"
-              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
+              className="flex items-center gap-1 md:gap-2 px-4 md:px-6 py-2 md:py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm md:text-base w-full sm:w-auto justify-center"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 md:w-5 md:h-5" />
               Créer un article
             </Link>
           </div>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
       </section>
 
       {/* Articles List */}
-      <section className="py-8">
+      <section className="py-6 md:py-8">
         <div className="container mx-auto px-4 max-w-7xl">
           {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -257,12 +257,12 @@ export default function DashboardPage() {
                   const canEdit = isSuperAdmin || article.author_id === user?.id
                   return (
                     <div key={article.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                        <div className="flex-1 w-full">
+                          <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
                             {article.title}
                           </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500 mb-2">
                             <Link
                               href={`/author/${article.author?.author_slug || article.author_id}`}
                               className="hover:text-primary transition-colors"
@@ -292,21 +292,21 @@ export default function DashboardPage() {
                           )}
                         </div>
                         {canEdit && (
-                          <div className="flex items-center gap-2 ml-4">
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
                             <Link
                               href={`/dashboard/articles/${article.id}/edit`}
-                              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                              className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base flex-1 sm:flex-initial justify-center"
                               title="Modifier"
                             >
-                              <Edit className="w-5 h-5" />
+                              <Edit className="w-4 h-4 md:w-5 md:h-5" />
                               <span>Modifier</span>
                             </Link>
                             <button
                               onClick={() => handleDelete(article.id, article.author_id)}
-                              className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                              className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm md:text-base flex-1 sm:flex-initial justify-center"
                               title="Supprimer"
                             >
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                               <span>Supprimer</span>
                             </button>
                           </div>

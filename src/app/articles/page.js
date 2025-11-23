@@ -110,9 +110,9 @@ export default function ArticlesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container mx-auto px-4 max-w-7xl xl:max-w-[1400px]">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">
             Tous les articles
           </h1>
           
@@ -122,7 +122,7 @@ export default function ArticlesPage() {
               <p className="text-sm mt-2">{error}</p>
             </div>
           ) : articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-12">
               {articles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}

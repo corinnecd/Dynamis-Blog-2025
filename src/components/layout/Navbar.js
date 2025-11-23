@@ -78,15 +78,15 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200 py-4">
+    <nav className="bg-white border-b border-gray-200 py-3 md:py-4">
       <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo à gauche */}
-        <Link href="/" className="text-2xl font-bold text-primary">
+        <Link href="/" className="text-xl md:text-2xl font-bold text-primary">
           DYNAMIS BLOG
         </Link>
         
-        {/* Catégories au centre */}
-        <div className="flex-1 flex justify-center">
+        {/* Catégories au centre - masqué sur mobile */}
+        <div className="hidden md:flex flex-1 justify-center">
           <Link 
             href="/categories" 
             className="px-4 py-2 rounded-lg transition-colors font-medium hover:text-primary"
@@ -96,19 +96,20 @@ export default function Navbar() {
         </div>
 
         {/* Boutons à droite */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {loading ? (
             <div className="w-5 h-5 border-2 border-gray-300 border-t-primary rounded-full animate-spin"></div>
           ) : user ? (
             <>
-              {/* Bouton Créer un article (sauf sur le dashboard) */}
+              {/* Bouton Créer un article (sauf sur le dashboard) - masqué sur mobile */}
               {!isDashboardPage && (
                 <Link
                   href="/dashboard/articles/new"
-                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-primary transition-colors font-medium"
+                  className="hidden md:flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-primary transition-colors font-medium"
+                  title="Créer un article"
                 >
                   <Plus className="w-4 h-4" />
-                  Créer un article
+                  <span>Créer un article</span>
                 </Link>
               )}
               
@@ -142,6 +143,18 @@ export default function Navbar() {
                       Dashboard
                     </Link>
                     
+                    {/* Bouton Créer un article dans le menu déroulant (visible sur mobile et desktop) */}
+                    {!isDashboardPage && (
+                      <Link
+                        href="/dashboard/articles/new"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded cursor-pointer outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Plus className="w-4 h-4" />
+                        Créer un article
+                      </Link>
+                    )}
+                    
                     <div className="h-px bg-gray-200 my-2" />
                     
                     <button
@@ -159,25 +172,51 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link 
-                href="/auth/signin" 
-                className="text-gray-700 hover:text-primary transition-colors font-medium"
-              >
-                Se connecter
-              </Link>
-              <Link 
-                href="/auth/signup" 
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
-              >
-                S'inscrire
-              </Link>
-              <Link 
-                href="/auth/signin" 
-                className="p-2 text-gray-700 hover:text-primary transition-colors"
-                aria-label="Profil"
-              >
-                <User className="w-5 h-5" />
-              </Link>
+              {/* Boutons Se connecter et S'inscrire - masqués sur mobile, visibles sur desktop */}
+              <div className="hidden md:flex items-center gap-4">
+                <Link 
+                  href="/auth/signin" 
+                  className="text-gray-700 hover:text-primary transition-colors font-medium"
+                >
+                  Se connecter
+                </Link>
+                <Link 
+                  href="/auth/signup" 
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
+                >
+                  S'inscrire
+                </Link>
+              </div>
+              
+              {/* Menu déroulant du profil - visible uniquement sur mobile quand non connecté */}
+              <div className="relative md:hidden" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="p-2 text-gray-700 hover:text-primary transition-colors rounded-full hover:bg-gray-100"
+                  aria-label="Menu profil"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+                
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 min-w-[220px] bg-white rounded-lg shadow-lg border border-gray-200 p-2 z-50">
+                    <Link
+                      href="/auth/signin"
+                      className="flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded cursor-pointer outline-none mb-2"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      Se connecter
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="flex items-center justify-center gap-2 px-3 py-2 text-sm bg-primary text-white rounded hover:bg-primary-hover transition-colors cursor-pointer outline-none"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      S'inscrire
+                    </Link>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

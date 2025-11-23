@@ -508,25 +508,25 @@ export default function EditArticlePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 max-w-4xl py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="flex items-center gap-2 mb-6">
-            <Pencil className="w-6 h-6 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-900">
+      <div className="container mx-auto px-4 max-w-4xl py-6 md:py-8">
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8">
+          <div className="flex items-center gap-2 mb-4 md:mb-6">
+            <Pencil className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
               Modifier l'article
             </h1>
           </div>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-6 md:mb-8">
             Modifiez les détails de votre article.
           </p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 md:mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {/* Titre */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -570,9 +570,9 @@ export default function EditArticlePage() {
               </label>
               
               {/* Zone de saisie, bouton Ajouter et zone d'affichage des tags sur une seule ligne */}
-              <div className="flex gap-2 items-start">
+              <div className="flex flex-col md:flex-row gap-2 items-start">
                 {/* Champ de saisie avec autocomplétion */}
-                <div className="relative w-48">
+                <div className="relative w-full md:w-48">
                   <input
                     type="text"
                     value={tagInput}
@@ -609,19 +609,19 @@ export default function EditArticlePage() {
                 </div>
                 
                 {/* Bouton Ajouter */}
-                <div className="flex flex-col w-24">
+                <div className="flex flex-col w-full md:w-24">
                   <button
                     type="button"
                     onClick={addTag}
                     disabled={tags.length >= 3 || !tagInput.trim()}
-                    className="px-2 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap h-[42px] text-sm"
+                    className="px-2 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap h-[42px] text-sm w-full md:w-auto"
                   >
                     Ajouter
                   </button>
                 </div>
                 
                 {/* Zone d'affichage des tags sélectionnés */}
-                <div className="flex-[3] flex flex-col">
+                <div className="w-full md:flex-[3] flex flex-col">
                   <div className="h-[42px] overflow-hidden border border-gray-300 rounded-lg p-2 bg-gray-50">
                     {tags.length === 0 ? (
                       <p className="text-sm text-gray-400 text-center py-1">
@@ -740,11 +740,11 @@ export default function EditArticlePage() {
             </div>
 
             {/* Boutons */}
-            <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 md:gap-4 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => window.location.href = '/dashboard'}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="px-4 md:px-6 py-2 md:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
                 disabled={uploading}
               >
                 Annuler
@@ -752,7 +752,7 @@ export default function EditArticlePage() {
               <button
                 type="submit"
                 disabled={uploading}
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 md:px-6 py-2 md:py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
               >
                 {uploading ? 'Enregistrement...' : 'Enregistrer les modifications'}
               </button>

@@ -39,7 +39,7 @@ export default function ArticleCard({ article }) {
         {/* Contenu - PADDING RÉDUIT de p-6 à p-5 */}
         <div className="p-5 flex-grow flex flex-col">
           {/* Meta : Auteur (cliquable) et Date */}
-          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+          <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500 mb-2">
             <Link
               href={`/author/${article.author?.author_slug || article.author_id}`}
               className="flex items-center gap-1 hover:text-primary transition-colors"
@@ -57,7 +57,7 @@ export default function ArticleCard({ article }) {
           </div>
           
           {/* Titre - TAILLE RÉDUITE de text-xl à text-lg */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors line-clamp-2">
             {article.title}
           </h3>
           

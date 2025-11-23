@@ -131,19 +131,19 @@ export default function CategoriesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-white py-12">
+      <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
             Toutes les catégories
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             Découvrez tous les sujets Tech qui vous passionnent.
           </p>
         </div>
       </section>
 
       {/* Categories Grid */}
-      <section className="py-12 pb-16">
+      <section className="py-8 md:py-12 pb-12 md:pb-16">
         <div className="container mx-auto px-4 max-w-7xl">
           {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -151,7 +151,7 @@ export default function CategoriesPage() {
               <p className="text-sm mt-2">{error}</p>
             </div>
           ) : categories.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mx-auto">
               {categories.map((category) => {
                 const IconComponent = getIcon(category.icon)
                 const articleCount = articleCounts[category.slug] || 0

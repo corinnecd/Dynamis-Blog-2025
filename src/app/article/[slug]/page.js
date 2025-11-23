@@ -263,9 +263,9 @@ export default function ArticleDetailPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Contenu principal */}
-      <article className="max-w-4xl mx-auto px-4 py-8">
+      <article className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         {/* Bouton retour et actions sur la même ligne */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-medium"
@@ -275,19 +275,19 @@ export default function ArticleDetailPage() {
           </Link>
           
           {canEdit && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Link
                 href={`/dashboard/articles/${article.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded transition-colors font-medium hover:bg-blue-700"
+                className="flex items-center justify-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded transition-colors font-medium hover:bg-blue-700 text-sm md:text-base"
               >
-                <Edit className="w-5 h-5" />
+                <Edit className="w-4 h-4 md:w-5 md:h-5" />
                 Modifier
               </Link>
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded transition-colors font-medium hover:bg-red-700"
+                className="flex items-center justify-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-red-600 text-white rounded transition-colors font-medium hover:bg-red-700 text-sm md:text-base"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                 Supprimer
               </button>
             </div>
@@ -307,12 +307,12 @@ export default function ArticleDetailPage() {
         )}
 
         {/* Titre */}
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6">
           {article.title}
         </h1>
 
         {/* Meta : Auteur (cliquable) et Date */}
-        <div className="flex items-center gap-4 text-gray-600 mb-8">
+        <div className="flex flex-wrap items-center gap-2 md:gap-4 text-sm md:text-base text-gray-600 mb-6 md:mb-8">
           <Link
             href={`/author/${article.author?.author_slug || article.author_id}`}
             className="flex items-center gap-2 hover:text-primary transition-colors"
