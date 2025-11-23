@@ -21,8 +21,14 @@ export default function Navbar() {
     async function fetchProfile() {
       if (user && user.id) {
         try {
-          const { createClient } = await import('../../lib/supabase/client')
-          const supabase = createClient()
+          const { createClient } = await import('@/lib/supabase/client')
+          let supabase
+          try {
+            supabase = createClient()
+          } catch (configError) {
+            console.error('❌ Navbar: Erreur configuration Supabase:', configError)
+            return
+          }
           const { data } = await supabase
             .from('profiles')
             .select('*')

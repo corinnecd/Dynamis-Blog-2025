@@ -19,7 +19,16 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true
-    const supabase = createClient()
+    let supabase
+    try {
+      supabase = createClient()
+    } catch (configError) {
+      console.error('❌ AuthContext: Erreur configuration Supabase:', configError)
+      if (mounted) {
+        setLoading(false)
+      }
+      return
+    }
 
     // Timeout de sécurité : forcer loading à false après 1 seconde maximum
     const timeoutId = setTimeout(() => {
@@ -68,6 +77,16 @@ export function AuthProvider({ children }) {
   // Inscription - Le trigger créera automatiquement le profil
   const signUp = async (email, password, username) => {
     try {
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ AuthContext signUp: Erreur configuration Supabase:', configError)
+        return { 
+          data: null, 
+          error: 'Erreur de configuration. Vérifiez les variables d\'environnement.'
+        }
+      }
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -93,6 +112,16 @@ export function AuthProvider({ children }) {
   // Connexion
   const signIn = async (email, password) => {
     try {
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ AuthContext signIn: Erreur configuration Supabase:', configError)
+        return { 
+          data: null, 
+          error: 'Erreur de configuration. Vérifiez les variables d\'environnement.'
+        }
+      }
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -111,7 +140,13 @@ export function AuthProvider({ children }) {
   // Déconnexion
   const signOut = async () => {
     try {
-      const supabase = createClient()
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (configError) {
+        console.error('❌ AuthContext signOut: Erreur configuration Supabase:', configError)
+        return { error: 'Erreur de configuration. Vérifiez les variables d\'environnement.' }
+      }
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       setUser(null)
