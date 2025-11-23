@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Calendar, User } from 'lucide-react'
 import { format } from 'date-fns'
-import { getImageUrl } from '../../lib/utils'
+import { getImageUrl } from '@/lib/utils'
 
 export default function ArticleCard({ article }) {
   // Extraire l'image de couverture du contenu si elle existe (format markdown ![alt](data:image...))
@@ -51,7 +51,7 @@ export default function ArticleCard({ article }) {
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               <span>
-                {format(new Date(article.created_at), 'd MMMM yyyy')}
+                {article.created_at ? format(new Date(article.created_at), 'd MMMM yyyy') : 'Date inconnue'}
               </span>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function ArticleCard({ article }) {
           
           {/* Tags et Catégorie */}
           <div className="flex flex-wrap gap-2">
-            {article.category && (
+            {article.category && article.category.slug && article.category.name && (
               <Link
                 href={`/categories/${article.category.slug}`}
                 className="inline-flex items-center text-xs font-medium px-3 py-1.5 border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"

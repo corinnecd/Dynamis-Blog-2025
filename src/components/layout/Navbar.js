@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import { User, LogOut, LayoutDashboard, Plus } from 'lucide-react'
 import { usePathname } from 'next/navigation'
